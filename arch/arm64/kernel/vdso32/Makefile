@@ -29,7 +29,6 @@ cc32-ldoption = $(call try-run,\
 VDSO_CPPFLAGS := -D__KERNEL__ -nostdinc
 VDSO_CPPFLAGS += -isystem $(shell $(CC_ARM32) -print-file-name=include 2>/dev/null)
 VDSO_CPPFLAGS += $(LINUXINCLUDE)
-VDSO_CPPFLAGS += $(KBUILD_CPPFLAGS)
 
 # Common C and assembly flags
 # From top-level Makefile
