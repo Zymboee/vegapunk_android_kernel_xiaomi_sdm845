@@ -814,6 +814,18 @@ KBUILD_AFLAGS	+= $(call cc-option,-mabi=lp64)
 # Some toolchains enable those fixes automatically, so opt-out.
 KBUILD_CFLAGS	+= $(call cc-option, -mno-fix-cortex-a53-835769)
 KBUILD_CFLAGS	+= $(call cc-option, -mno-fix-cortex-a53-843419)
+ifeq ($(cc-name),gcc)
+    KBUILD_CFLAGS += -march=armv8.2-a -mcpu=cortex-a75.cortex-a55+crc+crypto \
+                     -mtune=cortex-a75.cortex-a55 \
+                     -funroll-loops -funswitch-loops -fpeel-loops
+    KBUILD_AFLAGS += -march=armv8.2-a -mcpu=cortex-a75.cortex-a55+crc+crypto \
+                     -mtune=cortex-a75.cortex-a55
+endif
+ifeq ($(cc-name),clang)
+    KBUILD_CFLAGS += -march=armv8.2-a+crypto+rcpc -mcpu=cortex-a55 -mtune=cortex-a55 \
+                     -funroll-loops -mllvm -enable-load-pre
+    KBUILD_AFLAGS += -march=armv8.2-a+crypto+rcpc -mcpu=cortex-a55 -mtune=cortex-a55
+endif
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
