@@ -1438,6 +1438,8 @@ CONFIG_FORCE_FAST_CHARGE=y
 #
 # CONFIG_FPR_FPC is not set
 
+CONFIG_NTSYNC=y
+
 #
 # SCSI device support
 #
