@@ -308,8 +308,9 @@ else
 HOSTCC       = gcc
 HOSTCXX      = g++
 endif
-HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89 -pipe -fforce-addr 
-HOSTCXXFLAGS = -Ofast
+
+HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+HOSTCXXFLAGS = -O2
 
 ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
 HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
@@ -407,22 +408,11 @@ LINUXINCLUDE    := \
 LINUXINCLUDE	+= $(filter-out $(LINUXINCLUDE),$(USERINCLUDE))
 
 KBUILD_AFLAGS   := -D__ASSEMBLY__
-KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -pipe \
+KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -Wno-unused-function\
-		   -ffast-math -mcpu=cortex-a55 -mtune=cortex-a55 \
-		   -std=gnu89 \
-		   -mllvm -polly \
-		   -mllvm -polly-run-dce \
-		   -mllvm -polly-run-inliner \
-		   -mllvm -polly-opt-fusion=max \
-		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-vectorizer=stripmine \
-		   -mllvm -polly-detect-keep-going \
-		   -mllvm -polly-invariant-load-hoisting
-
+		   -std=gnu89
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
@@ -690,15 +680,11 @@ ifneq ($(ld-name),lld)
 LDFINAL_vmlinux := $(LD)
 LD		:= $(LDGOLD)
 LDFLAGS		+= -plugin LLVMgold.so
-LDFLAGS		+= -plugin-opt=mcpu=kryo
-endif
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
 LLVM_AR		:= llvm-ar
 LLVM_DIS	:= llvm-dis
 export LLVM_AR LLVM_DIS
-# Set O3 optimization level for LTO
-LDFLAGS		+= --plugin-opt=O3
 endif
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
@@ -785,30 +771,8 @@ endif
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 else
-KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS   += -O2
 endif
-
-KBUILD_CFLAGS	+= -O3 -mtune=cortex-a55 -mcpu=cortex-a55+crc+crypto+fp16+simd+sve \
--fomit-frame-pointer -pipe \
--funroll-loops \
--ftree-vectorize \
--fforce-addr \
-##-ftree-loop-vectorize \
-##-Wno-attribute-alias 
-
-#-floop-nest-optimize -fprefetch-loop-arrays 
-#KBUILD_CFLAGS	+= -fno-gcse  
-#KBUILD_CFLAGS	+= -floop-strip-mine -floop-block
-#KBUILD_CFLAGS	+= -floop-optimize -ftree-vectorize -ftracer
-LDFLAGS		+= -O3
-LDFLAGS += -fuse-ld=gold
-KBUILD_CFLAGS	+= $(call cc-option,-mabi=lp64)
-KBUILD_AFLAGS	+= $(call cc-option,-mabi=lp64)
-
-# This doesn't need 835769/843419 erratum fixes.
-# Some toolchains enable those fixes automatically, so opt-out.
-KBUILD_CFLAGS	+= $(call cc-option, -mno-fix-cortex-a53-835769)
-KBUILD_CFLAGS	+= $(call cc-option, -mno-fix-cortex-a53-843419)
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
